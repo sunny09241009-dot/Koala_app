@@ -17,7 +17,7 @@ export function createGateway(fetcher=fetch){return createServer(async(req,res)=
   if(!['GET','POST'].includes(req.method))return reply(405,{error:'不支持的操作'});
   if(req.method==='POST'&&origin!==allowedOrigin)return reply(403,{error:'无法接受此请求'});
   const headers={'Origin':upstream,'Accept':'application/json','User-Agent':'Mozilla/5.0 (compatible; KoalaConnection/1.0)'};
-  const auth=req.headers.authorization;if(auth){if(auth.length>120||!/^Bearer [A-Za-z0-9_-]*$/.test(auth))return reply(401,{error:'配对凭证无效'});headers.Authorization=auth}
+const auth=req.headers.authorization?.trim();if(auth&&auth!=='Bearer'){if(auth.length>120||!/^Bearer [A-Za-z0-9_-]*$/.test(auth))return reply(401,{error:'配对凭证无效'});headers.Authorization=auth}
   let body;
   if(req.method==='POST'){
    const parts=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>maxBody)return reply(413,{error:'内容太长了'});parts.push(chunk)}
