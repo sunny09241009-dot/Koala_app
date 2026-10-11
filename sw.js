@@ -1,4 +1,4 @@
-// 考拉抱抱 7.3：群聊 @ 成员
+// 考拉抱抱 7.4：启动画面与长按消息菜单
 const root=new URL(self.registration.scope);
 const icon=new URL('apple-touch-icon.png',root).href;
 function appUrl(value){try{const url=new URL(value||root.href,root);if(url.origin===root.origin&&url.pathname===root.pathname){if(url.searchParams.get('view')==='friends'&&/^[0-9a-f-]{36}$/i.test(url.searchParams.get('conversation')||''))return root.href+'?view=friends&conversation='+url.searchParams.get('conversation');return root.href+(url.searchParams.get('view')==='chat'?'?view=chat':'')}}catch{}return root.href}
