@@ -1,4 +1,4 @@
-// 考拉抱抱 8.1：聊天头像档案面板与动态头像框
+// 考拉抱抱 8.2：收起好友群组管理与直接邀请好友
 const root=new URL(self.registration.scope);
 const icon=new URL('apple-touch-icon.png',root).href;
 function appUrl(value){try{const url=new URL(value||root.href,root);if(url.origin===root.origin&&url.pathname===root.pathname){if(url.searchParams.get('view')==='friends'&&/^[0-9a-f-]{36}$/i.test(url.searchParams.get('conversation')||''))return root.href+'?view=friends&conversation='+url.searchParams.get('conversation');return root.href+(url.searchParams.get('view')==='chat'?'?view=chat':'')}}catch{}return root.href}
