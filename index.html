@@ -290,4 +290,247 @@ Error generating stack: `+e.message+`
  new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});scan();
 })();
 
-</script></body></html>
+</script>
+<script>
+(()=>{
+  const LS_KEY = 'koala_patpat_square_v10';
+  const DEFAULTS = {
+    selected: 'blackcat',
+    totalPhotos: 0,
+    growthValue: 0,
+    photos: [],
+    lastShotAt: 0,
+    dailyDate: '',
+    dailyCount: 0
+  };
+  const PETS = [
+    {id:'blackcat', name:'黑猫咪', file:'pet-assets/blackcat.png', color:'#f6efef'},
+    {id:'pinkcat', name:'粉猫咪', file:'pet-assets/pinkcat.png', color:'#fff0f5'},
+    {id:'mintbunny', name:'薄荷兔', file:'pet-assets/mintbunny.png', color:'#eef8ef'},
+    {id:'lavenderbear', name:'薰衣熊', file:'pet-assets/lavenderbear.png', color:'#f4f0ff'},
+    {id:'creamdog', name:'奶油狗', file:'pet-assets/creamdog.png', color:'#fff6ed'},
+    {id:'bluedragon', name:'小蓝龙', file:'pet-assets/bluedragon.png', color:'#eef6ff'}
+  ];
+  const css = `
+  .patpat-square-card{margin:16px 0 6px;border-radius:28px;background:linear-gradient(180deg,#fdeeed 0%,#f9e7e4 100%);box-shadow:0 10px 30px rgba(123,90,73,.08);padding:18px;border:1px solid rgba(211,177,164,.28);color:#473c37;aspect-ratio:1/1;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+  .patpat-square-card *{box-sizing:border-box}
+  .patpat-square-card::before{content:'';position:absolute;inset:auto -20% 60% auto;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.22);filter:blur(12px)}
+  .patpat-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;position:relative;z-index:1}
+  .patpat-titleWrap{display:flex;gap:12px;align-items:center}
+  .patpat-koalaIcon{width:68px;height:68px;border-radius:20px;background:rgba(255,255,255,.62);display:grid;place-items:center;font-size:32px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.6)}
+  .patpat-title{font-size:30px;font-weight:900;letter-spacing:.02em;line-height:1.08}
+  .patpat-sub{font-size:14px;opacity:.8;line-height:1.5;margin-top:6px}
+  .patpat-help{border:none;background:rgba(255,255,255,.62);border-radius:999px;padding:8px 12px;font-size:12px;color:#8a665e;font-weight:700}
+  .patpat-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;position:relative;z-index:1}
+  .patpat-stat{background:rgba(255,255,255,.72);border-radius:18px;padding:10px 8px;text-align:center}
+  .patpat-stat b{display:block;font-size:24px;line-height:1.1;color:#5d4b44;margin-top:4px}
+  .patpat-stat span{font-size:12px;color:#8d746c}
+  .patpat-body{margin-top:14px;background:rgba(255,255,255,.75);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:12px;position:relative;z-index:1}
+  .patpat-pet{display:flex;align-items:center;gap:12px}
+  .patpat-pet img{width:84px;height:84px;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(0,0,0,.08))}
+  .patpat-petName{font-size:22px;font-weight:900;color:#59433d}
+  .patpat-petMeta{font-size:13px;color:#8e746d;line-height:1.6}
+  .patpat-progressRow{display:flex;align-items:center;gap:10px}
+  .patpat-progress{flex:1;height:12px;background:#efd7d2;border-radius:999px;overflow:hidden}
+  .patpat-progress i{display:block;height:100%;background:linear-gradient(90deg,#e3a193,#d98777);border-radius:999px}
+  .patpat-gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .patpat-thumb,.patpat-more{aspect-ratio:1/1;border-radius:16px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;color:#a2837c}
+  .patpat-thumb img{width:100%;height:100%;object-fit:cover}
+  .patpat-cta{margin-top:auto;display:flex;align-items:center;justify-content:center;gap:10px;border:none;width:100%;border-radius:18px;background:#d79081;color:white;padding:14px 16px;font-size:22px;font-weight:900;box-shadow:0 8px 16px rgba(215,144,129,.28)}
+  .patpat-sheet{position:fixed;inset:0;z-index:9999;background:rgba(30,26,24,.38);display:none;align-items:flex-end;justify-content:center;padding:16px}
+  .patpat-sheet.show{display:flex}
+  .patpat-panel{width:min(760px,100%);max-height:90vh;overflow:auto;border-radius:28px 28px 20px 20px;background:#fffaf8;padding:18px 18px 26px;box-shadow:0 20px 60px rgba(0,0,0,.18);border:1px solid rgba(215,190,180,.4)}
+  .patpat-panelHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+  .patpat-panelTitle{font-size:28px;font-weight:900;color:#513f39}
+  .patpat-close{border:none;background:#f2e8e4;color:#8f7169;width:40px;height:40px;border-radius:14px;font-size:24px}
+  .patpat-note{color:#8f7d76;font-size:13px;line-height:1.6;margin:8px 0 14px}
+  .patpat-chooser{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+  .patpat-option{border:none;border-radius:18px;padding:12px;background:#fff;box-shadow:inset 0 0 0 1px #f0e4df;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .patpat-option.active{box-shadow:inset 0 0 0 2px #dd9c8f;background:#fff7f5}
+  .patpat-option img{width:70px;height:70px;object-fit:contain}
+  .patpat-option span{font-size:14px;font-weight:800;color:#5d4a43}
+  .patpat-card2{margin-top:14px;background:#fff;border-radius:20px;padding:16px;box-shadow:inset 0 0 0 1px #f0e6e2}
+  .patpat-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  .patpat-btn{border:none;border-radius:16px;padding:12px 16px;background:#d79081;color:white;font-weight:800;font-size:16px}
+  .patpat-btn.secondary{background:#f3e7e3;color:#8b6f67}
+  .patpat-gallery2{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  .patpat-gallery2 div{aspect-ratio:1/1;background:#f7f2ef;border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;color:#a28d86;font-size:12px}
+  .patpat-gallery2 img{width:100%;height:100%;object-fit:cover}
+  .patpat-sheetimg{width:100%;border-radius:18px;margin-top:14px;box-shadow:inset 0 0 0 1px #f2e7e1}
+  @media (max-width:620px){
+    .patpat-square-card{aspect-ratio:auto}
+    .patpat-koalaIcon{width:56px;height:56px;font-size:28px}
+    .patpat-title{font-size:26px}
+    .patpat-pet img{width:70px;height:70px}
+    .patpat-gallery2,.patpat-gallery{grid-template-columns:repeat(3,1fr)}
+    .patpat-chooser{grid-template-columns:repeat(2,1fr)}
+  }`;
+
+  function ensureCss(){
+    if(document.getElementById('koala-patpat-style')) return;
+    const style=document.createElement('style');
+    style.id='koala-patpat-style';
+    style.textContent=css;
+    document.head.appendChild(style);
+  }
+  function todayKey(){return new Date().toISOString().slice(0,10)}
+  function load(){
+    try{
+      const d=JSON.parse(localStorage.getItem(LS_KEY)||'null')||{};
+      const state={...DEFAULTS,...d};
+      if(state.dailyDate!==todayKey()){state.dailyDate=todayKey();state.dailyCount=0; save(state);} 
+      return state;
+    }catch(e){return {...DEFAULTS,dailyDate:todayKey()}}
+  }
+  function save(state){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+  function petById(id){ return PETS.find(p=>p.id===id) || PETS[0]; }
+  function stage(state){ if(state.totalPhotos<=0) return '蛋'; if(state.totalPhotos<12) return '幼态'; return '成体'; }
+  function progress(state){ return Math.min(100, Math.round((state.totalPhotos/20)*100)); }
+  function cooldownLabel(state){
+    const remain = 3600 - Math.floor((Date.now()- (state.lastShotAt||0))/1000);
+    if(remain<=0) return '可拍';
+    const mm = String(Math.floor(remain/60)).padStart(2,'0');
+    const ss = String(remain%60).padStart(2,'0');
+    return mm+':'+ss;
+  }
+  function createCard(state){
+    const pet=petById(state.selected);
+    const wrap=document.createElement('section');
+    wrap.className='patpat-square-card';
+    wrap.setAttribute('data-patpat-card','1');
+    const thumbs=(state.photos||[]).slice(0,3).map(src=>`<div class="patpat-thumb"><img src="${src}" alt="photo"></div>`).join('');
+    wrap.innerHTML=`
+      <div class="patpat-head">
+        <div class="patpat-titleWrap">
+          <div class="patpat-koalaIcon">🐨📷</div>
+          <div>
+            <div class="patpat-title">拍拍 <span style="font-size:.55em;color:#d58f82">❤</span></div>
+            <div class="patpat-sub">每位成员每小时可拍 1 张照片<br>一起喂养群宠，记录我们的日常</div>
+          </div>
+        </div>
+        <button class="patpat-help" type="button">方块区</button>
+      </div>
+      <div class="patpat-stats">
+        <div class="patpat-stat"><span>今日拍照</span><b>${state.dailyCount}</b></div>
+        <div class="patpat-stat"><span>成长值</span><b>+${state.growthValue}</b></div>
+        <div class="patpat-stat"><span>下次可拍</span><b style="font-size:20px">${cooldownLabel(state)}</b></div>
+      </div>
+      <div class="patpat-body">
+        <div class="patpat-pet">
+          <img src="${pet.file}" alt="${pet.name}">
+          <div>
+            <div class="patpat-petName">${pet.name}</div>
+            <div class="patpat-petMeta">当前阶段：${stage(state)}<br>成长进度 ${progress(state)}%</div>
+          </div>
+        </div>
+        <div class="patpat-progressRow"><span style="font-size:13px;color:#8d736c">成长中</span><div class="patpat-progress"><i style="width:${progress(state)}%"></i></div><b style="font-size:18px;color:#8f6258">${progress(state)}%</b></div>
+        <div class="patpat-gallery">${thumbs}${state.photos.length<4?'<div class="patpat-more">更多照片</div>':''}</div>
+      </div>
+      <button class="patpat-cta" type="button">📷 去拍拍</button>`;
+    wrap.querySelector('.patpat-cta').addEventListener('click', openPanel);
+    wrap.addEventListener('click', (e)=>{ if(!e.target.closest('.patpat-cta')) openPanel(); });
+    return wrap;
+  }
+  let sheet;
+  function buildSheet(){
+    if(sheet) return sheet;
+    sheet=document.createElement('div');
+    sheet.className='patpat-sheet';
+    sheet.innerHTML=`<div class="patpat-panel">
+      <div class="patpat-panelHead"><div class="patpat-panelTitle">拍拍</div><button class="patpat-close" type="button">×</button></div>
+      <div class="patpat-note">放在抱抱区的拍拍方块。每位成员每小时可拍 1 张照片，一起喂养电子宠物。这里是前端版本，资料会保存在这台手机浏览器里。</div>
+      <div class="patpat-card2">
+        <div style="font-size:22px;font-weight:900;color:#55443d">选择电子宠物</div>
+        <div class="patpat-note">每个群聊可以选择一个电子宠物蛋，随着日复一日拍照慢慢长大。</div>
+        <div class="patpat-chooser"></div>
+      </div>
+      <div class="patpat-card2 patpat-state"></div>
+      <div class="patpat-card2">
+        <div style="font-size:22px;font-weight:900;color:#55443d">大家的拍拍</div>
+        <div class="patpat-note">上传照片会增加成长值，并作为宠物能量记录。</div>
+        <div class="patpat-actions">
+          <input type="file" accept="image/*" id="patpat-file" hidden>
+          <button class="patpat-btn" type="button" data-role="upload">上传一张照片</button>
+          <button class="patpat-btn secondary" type="button" data-role="clear">清空照片</button>
+        </div>
+        <div class="patpat-gallery2"></div>
+      </div>
+      <img class="patpat-sheetimg" src="pet-assets/evolution-sheet.png" alt="六款萌宠图鉴">
+    </div>`;
+    sheet.addEventListener('click', e=>{ if(e.target===sheet) closePanel(); });
+    sheet.querySelector('.patpat-close').addEventListener('click', closePanel);
+    document.body.appendChild(sheet);
+    return sheet;
+  }
+  function renderPanel(){
+    const state=load();
+    const sh=buildSheet();
+    const chooser=sh.querySelector('.patpat-chooser');
+    chooser.innerHTML='';
+    PETS.forEach(p=>{
+      const btn=document.createElement('button');
+      btn.className='patpat-option'+(state.selected===p.id?' active':'');
+      btn.type='button';
+      btn.innerHTML=`<img src="${p.file}" alt="${p.name}"><span>${p.name}</span>`;
+      btn.addEventListener('click',()=>{ const s=load(); s.selected=p.id; save(s); refreshAll();});
+      chooser.appendChild(btn);
+    });
+    const pet=petById(state.selected);
+    sh.querySelector('.patpat-state').innerHTML=`
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+        <img src="${pet.file}" alt="${pet.name}" style="width:96px;height:96px;object-fit:contain;filter:drop-shadow(0 8px 14px rgba(0,0,0,.08))">
+        <div style="flex:1;min-width:180px">
+          <div style="font-size:24px;font-weight:900;color:#5a453e">${pet.name}</div>
+          <div class="patpat-note" style="margin:6px 0 10px">当前阶段：${stage(state)}　·　总拍照数：${state.totalPhotos}　·　成长值：${state.growthValue}</div>
+          <div class="patpat-progressRow"><span style="font-size:13px;color:#8d736c">成长进度</span><div class="patpat-progress"><i style="width:${progress(state)}%"></i></div><b style="font-size:18px;color:#8f6258">${progress(state)}%</b></div>
+        </div>
+      </div>`;
+    const gallery=sh.querySelector('.patpat-gallery2');
+    gallery.innerHTML = (state.photos||[]).length ? state.photos.map(src=>`<div><img src="${src}" alt="photo"></div>`).join('') : '<div>还没有照片</div><div>去拍拍吧</div><div>每小时 1 张</div><div>慢慢长大</div>';
+    sh.querySelector('[data-role="upload"]').onclick = ()=> sh.querySelector('#patpat-file').click();
+    sh.querySelector('[data-role="clear"]').onclick = ()=>{ if(confirm('要清空拍拍照片吗？')){ const s=load(); s.photos=[]; s.totalPhotos=0; s.growthValue=0; s.dailyCount=0; s.lastShotAt=0; save(s); refreshAll(); } };
+    sh.querySelector('#patpat-file').onchange = async (e)=>{
+      const file=e.target.files && e.target.files[0];
+      if(!file) return;
+      const s=load();
+      const remain = 3600 - Math.floor((Date.now()- (s.lastShotAt||0))/1000);
+      if(remain>0){ alert('还要再等 '+Math.ceil(remain/60)+' 分钟才能再拍一张喔'); e.target.value=''; return; }
+      const data = await new Promise((resolve,reject)=>{const r=new FileReader(); r.onload=()=>resolve(r.result); r.onerror=reject; r.readAsDataURL(file);});
+      s.photos.unshift(data); s.photos=s.photos.slice(0,12); s.totalPhotos += 1; s.growthValue += 6; s.lastShotAt = Date.now(); if(s.dailyDate!==todayKey()){s.dailyDate=todayKey(); s.dailyCount=0;} s.dailyCount += 1; save(s); e.target.value=''; refreshAll();
+    };
+  }
+  function openPanel(){ buildSheet(); renderPanel(); sheet.classList.add('show'); }
+  function closePanel(){ if(sheet) sheet.classList.remove('show'); }
+  function findInsertTarget(){
+    const markers=[...document.querySelectorAll('section,div')].filter(el=> el.textContent && el.textContent.includes('你们的小小连接'));
+    for(const node of markers){
+      const card=node.closest('section,article,div');
+      if(card && card.parentElement) return card;
+    }
+    return null;
+  }
+  function refreshCard(){
+    ensureCss();
+    const old=document.querySelector('[data-patpat-card="1"]');
+    const target=findInsertTarget();
+    if(!target || !target.parentElement) return;
+    if(old && old.previousElementSibling===target) {
+      old.replaceWith(createCard(load()));
+      return;
+    }
+    if(old) old.remove();
+    target.insertAdjacentElement('afterend', createCard(load()));
+  }
+  function refreshAll(){ refreshCard(); if(sheet && sheet.classList.contains('show')) renderPanel(); }
+  new MutationObserver(()=>{
+    clearTimeout(window.__patpatSquareTimer);
+    window.__patpatSquareTimer=setTimeout(refreshCard, 250);
+  }).observe(document.body,{childList:true,subtree:true});
+  ensureCss();
+  setInterval(()=>{ const card=document.querySelector('[data-patpat-card="1"]'); if(card){ const fresh=createCard(load()); card.replaceWith(fresh);} }, 1000);
+  window.addEventListener('load', ()=> setTimeout(refreshCard, 600));
+  setTimeout(refreshCard, 1200);
+})();
+</script>
+
+</body></html>
