@@ -236,4 +236,58 @@ Error generating stack: `+e.message+`
   else document.addEventListener('DOMContentLoaded',()=>{new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});schedule();},{once:true});
 })();
 
+</script><script data-koala-pets="9.8">
+/* 狗狗猫猫大总汇 v9.8: static transparent assets; existing authenticated photo queue. */
+(()=>{
+ 'use strict';
+ if(window.KoalaPetPack)return; window.KoalaPetPack=true;
+ const labels=['困困哈欠猫','发夹小白狗','震惊舔鼻猫','猪猪帽猫','眯眼笑猫','委屈灰猫','吐舌黑猫','可怜白猫','生气奶牛猫','困困三花','怀疑灰猫','开心比格','微笑柯基','气鼓柴犬','撒娇金毛','震惊贵宾','哈欠腊肠','歪头哈士奇','眨眼比熊','喷嚏博美'];
+ const base=new URL('./',location.href);
+ const style=document.createElement('style');
+ style.textContent=`.sticker-picker .pet-tab{border-radius:16px;padding:6px 12px;background:#efe6dc;color:#68594c;white-space:nowrap}.sticker-picker .pet-tab.selected{background:#82725e;color:#fff}.pet-panel{display:none}.sticker-picker.pet-open>.pet-panel{display:block}.sticker-picker.pet-open>.sticker-grid,.sticker-picker.pet-open>.koala-my-panel,.sticker-picker.pet-open>p{display:none!important}.pet-title{font-size:13px;font-weight:700;color:#65594d;margin:8px 0}.pet-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-height:300px;overflow:auto;overscroll-behavior:contain}.pet-grid button{aspect-ratio:1;padding:3px;background:transparent;border-radius:14px;min-width:0}.pet-grid button:active{background:#eee4d8;transform:scale(.94)}.pet-grid button:disabled{opacity:.5}.pet-grid img{display:block;width:100%;height:100%;object-fit:contain}.pet-status{font-size:11px;color:#756b5f;min-height:17px;margin:6px 0}`;
+ document.head.append(style);
+ function attach(picker){
+  if(picker.querySelector('.pet-tab'))return;
+  const tabs=picker.querySelector('.sticker-tabs');if(!tabs)return;
+  const tab=document.createElement('button');tab.type='button';tab.className='pet-tab';tab.textContent='贴图 2';tab.setAttribute('aria-expanded','false');
+  const panel=document.createElement('div');panel.className='pet-panel';
+  const title=document.createElement('div');title.className='pet-title';title.textContent='狗狗猫猫大总汇 · 20 张';
+  const grid=document.createElement('div');grid.className='pet-grid';
+  const status=document.createElement('p');status.className='pet-status';status.setAttribute('role','status');
+  panel.append(title,grid,status);tabs.append(tab);picker.append(panel);
+  let built=false,busy=false;
+  tab.onclick=()=>{const open=!picker.classList.contains('pet-open');picker.classList.toggle('pet-open',open);tab.classList.toggle('selected',open);tab.setAttribute('aria-expanded',String(open));if(open&&!built){built=true;build();}};
+  tabs.addEventListener('click',e=>{if(tab.contains(e.target))return;picker.classList.remove('pet-open');tab.classList.remove('selected');tab.setAttribute('aria-expanded','false');});
+  function build(){labels.forEach((label,i)=>{
+   const url=new URL('pet-stickers/pet-'+String(i+1).padStart(2,'0')+'.png',base).href;
+   const b=document.createElement('button');b.type='button';b.setAttribute('aria-label','发送'+label);
+   const img=document.createElement('img');img.src=url;img.alt=label;img.loading='lazy';img.decoding='async';b.append(img);grid.append(b);
+   img.onerror=()=>{status.textContent='贴图尚未载入，请检查更新包中的 pet-stickers 文件夹是否已上传。';};
+   b.onclick=async()=>{
+    if(busy)return;
+    const owner=picker.closest('.chat-mode,.social-chat,.chat-active,.koala-shell')||document;
+    const composer=Array.from(owner.querySelectorAll('.composer')).find(el=>el.getClientRects().length&&el.querySelector('.attach-sticker'));
+    const input=composer?.querySelector('input[type="file"]');
+    if(!input||!window.KoalaUserStickers){status.textContent='请重新打开聊天室后再试。';return;}
+    if(composer.querySelector('.attach-photo')?.disabled){status.textContent='请等目前的发送完成。';return;}
+    busy=true;grid.querySelectorAll('button').forEach(x=>x.disabled=true);status.textContent='正在准备贴图…';
+    const abort=new AbortController();const timeout=setTimeout(()=>abort.abort(),20000);
+    try{
+     const response=await fetch(url,{signal:abort.signal});if(!response.ok)throw Error('贴图载入失败，请稍后重试');
+     const blob=await response.blob();if(!blob.type.startsWith('image/'))throw Error('请确认贴图文件已上传');
+     if(!picker.isConnected||!input.isConnected)return;
+     const file=new File([blob],'koala-custom-sticker-pet-'+(i+1)+'.png',{type:'image/png'});
+     const dt=new DataTransfer();dt.items.add(file);input.files=dt.files;
+     input.dispatchEvent(new Event('change',{bubbles:true}));
+     status.textContent='已加入发送队列，请查看讯息的发送状态。';
+     picker.querySelector('.sticker-picker-top button')?.click();
+    }catch(e){status.textContent=e.name==='AbortError'?'载入超时，请再点一次。':e.message;}
+    finally{clearTimeout(timeout);busy=false;grid.querySelectorAll('button').forEach(x=>x.disabled=false);}
+   };
+  });}
+ }
+ let scheduled=false;const scan=()=>{if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;document.querySelectorAll('.sticker-picker').forEach(attach);});};
+ new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});scan();
+})();
+
 </script></body></html>
