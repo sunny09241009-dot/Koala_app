@@ -1,4 +1,4 @@
-// 考拉抱抱 8.4：十款梦幻动态头像框
+// 考拉抱抱 8.6：地图入口、全部未读、影片与链接、摇一摇
 const root=new URL(self.registration.scope);
 const icon=new URL('apple-touch-icon.png',root).href;
 function appUrl(value){try{const url=new URL(value||root.href,root);if(url.origin===root.origin&&url.pathname===root.pathname){if(url.searchParams.get('view')==='friends'&&/^[0-9a-f-]{36}$/i.test(url.searchParams.get('conversation')||''))return root.href+'?view=friends&conversation='+url.searchParams.get('conversation');return root.href+(url.searchParams.get('view')==='chat'?'?view=chat':'')}}catch{}return root.href}
